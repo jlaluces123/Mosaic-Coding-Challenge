@@ -13,6 +13,7 @@ import {
     sortBy,
     reverse,
     isNumber,
+    orderBy,
 } from 'lodash';
 
 import './index.css';
@@ -20,6 +21,8 @@ import './index.css';
 // Constants
 const AZ = 1;
 const ZA = 2;
+
+let statusTable = {};
 
 ///////////////////////////////////////////////////////////////////////////////
 // DATA GRID COMPONENTS
@@ -65,7 +68,7 @@ const DataGrid = () => {
     // },
 
     // State
-    const [sortedOn, setSortedOn] = useState(['none', AZ]);
+    const [sortedOn, setSortedOn] = useState(['none', AZ]); // ==> figure out a way to use this
     const [pinnedColumns, setPinnedColumns] = useState([]);
     const [data, setData] = useState([]);
 
@@ -86,24 +89,28 @@ const DataGrid = () => {
             .catch((err) => console.error('ERROR fetching data: ', err));
     };
 
-    const handleSort = (col) => {
-        console.log(`Sorting ${col} with ${sortedOn}`);
+    const handleSort = (event, col) => {
+        let colSelected = col.toLowerCase();
 
-        // Sort By column given
-        let newArr = sortBy(data, [(dataPoint) => dataPoint[col]]);
-        setData(newArr);
-
-        console.log(newArr);
+        if (!statusTable[colSelected]) {
+            statusTable[colSelected] = 1;
+            setData(sortBy(data, [colSelected]));
+            event.target.innerText += ' ^';
+        } else if (statusTable[colSelected] === 2) {
+            delete statusTable[colSelected];
+            fetchData();
+            event.target.innerText = event.target.innerText.split(' ')[0];
+        } else {
+            statusTable[colSelected] += 1;
+            setData(orderBy(data, [colSelected], ['desc']));
+            event.target.innerText = event.target.innerText.replace(' ^', ' v');
+        }
     };
 
     useEffect(() => {
         console.log('Fetching data...');
         fetchData();
     }, []);
-
-    useEffect(() => {
-        console.log('Data has been changed...', data);
-    }, [data]);
 
     // Event handlers
     const onClick = useCallback(
@@ -114,7 +121,7 @@ const DataGrid = () => {
             } else {
                 // sorting
                 /* TODO: implement the onclick handler for sorting */
-                handleSort(col);
+                handleSort(event, col);
             }
         },
         [sortedOn, pinnedColumns, data]
