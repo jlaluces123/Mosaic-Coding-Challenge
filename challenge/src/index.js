@@ -14,6 +14,7 @@ import {
     reverse,
     isNumber,
     orderBy,
+    union,
 } from 'lodash';
 
 import './index.css';
@@ -89,6 +90,7 @@ const DataGrid = () => {
             .catch((err) => console.error('ERROR fetching data: ', err));
     };
 
+    /* TODO: reset all other fields that have a ^ or v if that column wasnt clicked on */
     const handleSort = (event, col) => {
         let colSelected = col.toLowerCase();
 
@@ -107,10 +109,24 @@ const DataGrid = () => {
         }
     };
 
+    const handlePinning = (col) => {
+        /*
+        1. Add the column to pinned columns
+        2. Every time we add a pinned column, union (pinnedColumns , columns)
+      */
+        console.log(pinnedColumns, col);
+        setPinnedColumns(uniq([...pinnedColumns, col]));
+    };
+
     useEffect(() => {
         console.log('Fetching data...');
         fetchData();
     }, []);
+
+    useEffect(() => {
+        // setPinnedColumns(union(pinnedColumns, columns));
+        console.log(pinnedColumns);
+    }, [pinnedColumns]);
 
     // Event handlers
     const onClick = useCallback(
@@ -118,6 +134,7 @@ const DataGrid = () => {
             if (event.metaKey) {
                 // pinning
                 /* TODO: implement the onclick handler for pinning */
+                handlePinning(col);
             } else {
                 // sorting
                 /* TODO: implement the onclick handler for sorting */
