@@ -23,6 +23,8 @@ import './index.css';
 const AZ = 1;
 const ZA = 2;
 
+// Table in order to keep track of what sort a column is using
+// Ex. { 'population': 1 (aka AZ) }
 let statusTable = {};
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +33,7 @@ let statusTable = {};
 // A single cell in a data grid
 const Cell = ({ datum }) => {
     return (
-        <td onClick={(e) => console.log(e.target)}>
+        <td>
             {isString(datum) && datum.toLowerCase().endsWith('.png') ? (
                 <img src={datum} />
             ) : isNumber(datum) ? (
@@ -55,18 +57,6 @@ const DataGrid = () => {
     // Load the data from JSON, which you can find at:
     // https://assets.codepen.io/5781725/states-data.json
     // We include some data for testing purposes
-    // {
-    //    state:"Alabama",
-    //    abbreviation:"AL",
-    //    population:4921532,
-    //    size:52420.07,
-    // },
-    // {
-    //    state:"Alaska",
-    //    abbreviation:"AK",
-    //    population:731158,
-    //    size:665384.04,
-    // },
 
     // State
     const [sortedOn, setSortedOn] = useState(['none', AZ]); // ==> figure out a way to use this
@@ -97,7 +87,7 @@ const DataGrid = () => {
         if (!statusTable[colSelected]) {
             statusTable[colSelected] = 1;
             setData(sortBy(data, [colSelected]));
-            event.target.innerText += ' ^';
+            event.target.innerText += ' ↑';
         } else if (statusTable[colSelected] === 2) {
             delete statusTable[colSelected];
             fetchData();
@@ -105,17 +95,16 @@ const DataGrid = () => {
         } else {
             statusTable[colSelected] += 1;
             setData(orderBy(data, [colSelected], ['desc']));
-            event.target.innerText = event.target.innerText.replace(' ^', ' v');
+            event.target.innerText = event.target.innerText.replace(' ↑', ' ↓');
         }
     };
 
     const handlePinning = (col) => {
-        /*
-        1. Add the column to pinned columns
-        2. Every time we add a pinned column, union (pinnedColumns , columns)
-      */
-        console.log(pinnedColumns, col);
-        setPinnedColumns(uniq([...pinnedColumns, col]));
+        /*  
+          1. Add the column to pinned columns
+          2. Every time we add a pinned column, union (pinnedColumns , columns)
+        */
+        setPinnedColumns(uniq([...pinnedColumns, col, ...columns]));
     };
 
     useEffect(() => {
@@ -151,21 +140,33 @@ const DataGrid = () => {
         <table>
             <thead>
                 <tr>
-                    {columns.map((col, i) => (
-                        <HeaderCell
-                            key={i}
-                            title={col}
-                            onClick={onClick(col)}
-                        />
-                    ))}
+                    {pinnedColumns[0]
+                        ? pinnedColumns.map((col, i) => (
+                              <HeaderCell
+                                  key={i}
+                                  title={col}
+                                  onClick={onClick(col)}
+                              />
+                          ))
+                        : columns.map((col, i) => (
+                              <HeaderCell
+                                  key={i}
+                                  title={col}
+                                  onClick={onClick(col)}
+                              />
+                          ))}
                 </tr>
             </thead>
             <tbody>
                 {data.map((row, i) => (
                     <tr key={i}>
-                        {columns.map((col, j) => (
-                            <Cell key={j} datum={row[col]} />
-                        ))}
+                        {pinnedColumns[0]
+                            ? pinnedColumns.map((col, j) => (
+                                  <Cell key={j} datum={row[col]} />
+                              ))
+                            : columns.map((col, j) => (
+                                  <Cell key={j} datum={row[col]} />
+                              ))}
                     </tr>
                 ))}
             </tbody>
