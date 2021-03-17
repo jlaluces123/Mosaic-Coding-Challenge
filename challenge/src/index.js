@@ -108,8 +108,19 @@ const DataGrid = () => {
           2. Every time we add a pinned column, union (pinnedColumns , columns)
         */
         let pinnedColumnsCopy = [...pinnedColumns];
-        pinnedColumnsCopy.push(col);
-        setUpdatedColumns(uniq([pinnedColumnsCopy, ...columns]));
+
+        if (!pinnedColumnsCopy.includes(col)) {
+            pinnedColumnsCopy.push(col);
+            setPinnedColumns(pinnedColumnsCopy);
+            setUpdatedColumns(uniq([...pinnedColumnsCopy, ...columns]));
+        } else {
+            let index = pinnedColumnsCopy.indexOf(col);
+            if (index !== -1) {
+                pinnedColumnsCopy.splice(index, 1);
+                setPinnedColumns(pinnedColumnsCopy);
+                setUpdatedColumns(uniq([...pinnedColumnsCopy, ...columns]));
+            }
+        }
     };
 
     useEffect(() => {
@@ -119,8 +130,8 @@ const DataGrid = () => {
 
     useEffect(() => {
         // setPinnedColumns(union(pinnedColumns, columns));
-        console.log(pinnedColumns);
-    }, [pinnedColumns]);
+        console.log(updatedColumns);
+    }, [updatedColumns]);
 
     // Event handlers
     const onClick = useCallback(
