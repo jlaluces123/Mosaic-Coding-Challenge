@@ -74,7 +74,7 @@ const DataGrid = () => {
     );
 
     useEffect(() => {
-        console.log('Fetching data...');
+        // console.log('Fetching data...');
         fetchData();
     }, []);
 
@@ -89,7 +89,7 @@ const DataGrid = () => {
     /* TODO: Reset all other fields that have a ^ or v if that column wasnt clicked on */
     const handleSort = (event, col) => {
         let colSelected =
-            typeof col === 'string' ? col.toLowerCase() : col[0].toLowerCase();
+            typeof col === 'string' ? col.toLowerCase() : col[0].toLowerCase(); // ==> col usually is either "someString" || ["someString"] after pinning
 
         if (!statusTable[colSelected]) {
             statusTable[colSelected] = 1;
@@ -109,7 +109,7 @@ const DataGrid = () => {
     const handlePin = (col) => {
         /*  BUG: can't pin state column to beginning after pinning multiple columns */
         let pinnedColumnsCopy = [...pinnedColumns];
-        console.log(col, pinnedColumnsCopy);
+        // console.log(col, pinnedColumnsCopy);
 
         if (!pinnedColumnsCopy.includes(col)) {
             pinnedColumnsCopy.push(col);
@@ -117,7 +117,7 @@ const DataGrid = () => {
             setUpdatedColumns(uniq([...pinnedColumnsCopy, ...columns]));
         } else {
             let index = pinnedColumnsCopy.indexOf(col);
-            console.log(index);
+            // console.log(index);
             if (index !== -1) {
                 pinnedColumnsCopy.splice(index, 1);
                 setPinnedColumns(pinnedColumnsCopy);
