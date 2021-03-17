@@ -73,6 +73,11 @@ const DataGrid = () => {
         )
     );
 
+    useEffect(() => {
+        console.log('Fetching data...');
+        fetchData();
+    }, []);
+
     /* TODO: Load the data from the URL */
     const fetchData = () => {
         fetch('https://assets.codepen.io/5781725/states-data.json')
@@ -81,9 +86,8 @@ const DataGrid = () => {
             .catch((err) => console.error('ERROR fetching data: ', err));
     };
 
-    /* TODO: reset all other fields that have a ^ or v if that column wasnt clicked on */
+    /* TODO: Reset all other fields that have a ^ or v if that column wasnt clicked on */
     const handleSort = (event, col) => {
-        console.log('selected: ', typeof col, col);
         let colSelected =
             typeof col === 'string' ? col.toLowerCase() : col[0].toLowerCase();
 
@@ -103,11 +107,9 @@ const DataGrid = () => {
     };
 
     const handlePin = (col) => {
-        /*  
-          1. Add the column to pinned columns
-          2. Every time we add a pinned column, union (pinnedColumns , columns)
-        */
+        /*  BUG: can't pin state column to beginning after pinning multiple columns */
         let pinnedColumnsCopy = [...pinnedColumns];
+        console.log(col, pinnedColumnsCopy);
 
         if (!pinnedColumnsCopy.includes(col)) {
             pinnedColumnsCopy.push(col);
@@ -115,6 +117,7 @@ const DataGrid = () => {
             setUpdatedColumns(uniq([...pinnedColumnsCopy, ...columns]));
         } else {
             let index = pinnedColumnsCopy.indexOf(col);
+            console.log(index);
             if (index !== -1) {
                 pinnedColumnsCopy.splice(index, 1);
                 setPinnedColumns(pinnedColumnsCopy);
@@ -123,20 +126,11 @@ const DataGrid = () => {
         }
     };
 
-    useEffect(() => {
-        console.log('Fetching data...');
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        // setPinnedColumns(union(pinnedColumns, columns));
-        console.log(updatedColumns);
-    }, [updatedColumns]);
-
     // Event handlers
     const onClick = useCallback(
         (col) => (event) => {
             if (event.metaKey) {
+                // ==> windows key + click || command key + click
                 // pinning
                 /* TODO: implement the onclick handler for pinning */
                 handlePin(col);
