@@ -62,6 +62,7 @@ const DataGrid = () => {
     const [sortedOn, setSortedOn] = useState(['none', AZ]); // ==> figure out a way to use this
     const [pinnedColumns, setPinnedColumns] = useState([]);
     const [data, setData] = useState([]);
+    const [updatedColumns, setUpdatedColumns] = useState([]);
 
     // Preprocess the data to get a list of columns and add a helper index
     const columns = uniq(
@@ -82,7 +83,9 @@ const DataGrid = () => {
 
     /* TODO: reset all other fields that have a ^ or v if that column wasnt clicked on */
     const handleSort = (event, col) => {
-        let colSelected = col.toLowerCase();
+        console.log('selected: ', typeof col, col);
+        let colSelected =
+            typeof col === 'string' ? col.toLowerCase() : col[0].toLowerCase();
 
         if (!statusTable[colSelected]) {
             statusTable[colSelected] = 1;
@@ -99,12 +102,14 @@ const DataGrid = () => {
         }
     };
 
-    const handlePinning = (col) => {
+    const handlePin = (col) => {
         /*  
           1. Add the column to pinned columns
           2. Every time we add a pinned column, union (pinnedColumns , columns)
         */
-        setPinnedColumns(uniq([...pinnedColumns, col, ...columns]));
+        let pinnedColumnsCopy = [...pinnedColumns];
+        pinnedColumnsCopy.push(col);
+        setUpdatedColumns(uniq([pinnedColumnsCopy, ...columns]));
     };
 
     useEffect(() => {
@@ -123,7 +128,7 @@ const DataGrid = () => {
             if (event.metaKey) {
                 // pinning
                 /* TODO: implement the onclick handler for pinning */
-                handlePinning(col);
+                handlePin(col);
             } else {
                 // sorting
                 /* TODO: implement the onclick handler for sorting */
@@ -140,8 +145,8 @@ const DataGrid = () => {
         <table>
             <thead>
                 <tr>
-                    {pinnedColumns[0]
-                        ? pinnedColumns.map((col, i) => (
+                    {updatedColumns[0]
+                        ? updatedColumns.map((col, i) => (
                               <HeaderCell
                                   key={i}
                                   title={col}
@@ -160,8 +165,8 @@ const DataGrid = () => {
             <tbody>
                 {data.map((row, i) => (
                     <tr key={i}>
-                        {pinnedColumns[0]
-                            ? pinnedColumns.map((col, j) => (
+                        {updatedColumns[0]
+                            ? updatedColumns.map((col, j) => (
                                   <Cell key={j} datum={row[col]} />
                               ))
                             : columns.map((col, j) => (
